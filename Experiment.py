@@ -2,7 +2,7 @@ from L96 import *
 from EnKF import *
 from tqdm import tqdm
 class Experiment():
-    def __init__(self,x0,N,F,deltat,xstd=1,ystd = 1,loc=0,gamma=1,nens=1):
+    def __init__(self,x0,N,F,deltat,xstd=1,ystd = 1,loc=0,gamma=1,nens=1,frac=1,desc=None):
         self.x0 = x0
         self.N = N
         self.F = F
@@ -13,6 +13,8 @@ class Experiment():
         self.deltat = deltat
         self.da = EnKF(N,loc,gamma,nens)
         self.da.initialize(x0,xstd)
+        self.desc = desc
+        self.frac = frac
 
     def getTrue(self,T):
         self.xx = self.M.integrate(self.x0,np.linspace(0,T,int(T/self.deltat+1)))
@@ -38,12 +40,19 @@ class Experiment():
             xa[i] = xp
         self.xa = xa
         self.xf = xfall
-        self.errors_a = xa.mean(axis=2).transpose()-self.xx[:,1:]
-        self.errors_obs = self.yy-self.xx
 
     def rms(self):
         ss = (self.errors_a**2).sum(axis=0)
         ss = ss/self.N
         ret = np.sqrt(ss)
         return(ret)
+
+    def makeH(self):
+        h = list(range(self.N))
+        if self.frac<1:
+            np.random.shuffle(h)
+            h = h[:int(self.N * frac)]
+        else:
+            pass
+        return(h)
 

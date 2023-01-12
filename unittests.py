@@ -165,7 +165,9 @@ class ExperimentTest(unittest.TestCase):
         experiment.getTrue(tf)
         experiment.Makeobs()
         experiment.Assimilate()
-        self.assertLess(experiment.errors_a.std(),.5*experiment.errors_obs.std())
+        errors_a = experiment.xa.mean(axis=2).transpose()-experiment.xx[:,1:]
+        errors_obs = experiment.yy-experiment.xx
+        self.assertLess(errors_a.std(),.5*errors_obs.std())
 
     def testRMS(self):
         N = 2
@@ -178,6 +180,21 @@ class ExperimentTest(unittest.TestCase):
         expected = np.array([1,2])
         rms = experiment.rms()
         self.assertEqual(True,(expected==rms).all())
+
+    def testmakeobs(self):
+        N = 10
+        F = 0.5
+        dt = 0.05
+        nens = 25
+        x0 = np.ones(N)
+        experiment = Experiment(x0,N,F,dt,nens=nens)
+        h = experiment.makeH()
+        self.assertEqual(list(range(N)),h)
+
+        self.frac = 0.5
+        np.random.seed(0)
+        h = experiment.makeH()
+        self.assertEqual([True for i in range(int(experiment.frac*N))],[hi in list(range(N)) for hi in h])
 
 
 
