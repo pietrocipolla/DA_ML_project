@@ -18,5 +18,5 @@ r = experiment.xx.std()*.3
 experiment.ystd = r
 experiment.Makeobs()
 experiment.Assimilate()
-with open('Sensitivity/s1.pickle','wb') as f:
+with open('s5.pickle','wb') as f:
     pickle.dump(experiment,f)

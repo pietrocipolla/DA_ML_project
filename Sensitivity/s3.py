@@ -5,7 +5,7 @@ import pickle
 np.random.seed(0)
 F = 8
 N = 40
-nens = 20
+nens = 25
 gamma = 1
 loc = 5
 x0 = F*np.ones(N)
