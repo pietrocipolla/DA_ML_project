@@ -5,7 +5,7 @@ There are 3 classes.
 
 L96 contains methods for differentiating and integrating the Lorenz96 system for arbitrary N and F.
 
-EnKF contains contains methods for assimilating data using the Ensemble Kalman Filter
+EnKF contains methods for assimilating data using the Ensemble Kalman Filter
 
 Experiment objects each contain run settings, methods for generating truth and observations, and methods for
 assimilating a set of observations. When a run is complete the object contains all input and results.
