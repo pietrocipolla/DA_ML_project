@@ -1,16 +1,11 @@
 # machine_learning_DA_part_1
-Code repository for Luke Howard's project on using Machine Learning for data assimilation
+Code repository for Luke Howard's project on using Machine Learning for data assimilation.
 
-Current commit includes the following training data
+There are 3 classes.
 
-xa.txt, xf.txt, xx.txt, yy.txt
+L96 contains methods for differentiating and integrating the Lorenz96 system for arbitrary N and F.
 
-Analysis, forecast, truth, and measurements respectively using:
+EnKF contains contains methods for assimilating data using the Ensemble Kalman Filter
 
-{'N':10,'F':8,'tmax':4000,'deltat':0.05,'ens_size':20,'sigma_x':0.1,'r':1,'gamma':1,'loc':3}
-
-xa1.txt, xf1.txt, xx1.txt, yy1.txt
-
-Settings:
-
-{'N':10,'F':8,'tmax':4000,'deltat':0.1,'ens_size':20,'sigma_x':0.1,'r':1,'gamma':1,'loc':3}
+Experiment objects each contain run settings, methods for generating truth and observations, and methods for
+assimilating a set of observations. When a run is complete the object contains all input and results.
