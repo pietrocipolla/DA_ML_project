@@ -10,7 +10,7 @@ class L96:
         Calculate the derivative of x
 
         :param x: current value of x (numpy array of length N)
-        :param t: current time (not used, d/dt doens't have explicit time dependence
+        :param t: current time (not used, d/dt doesn't have explicit time dependence
         :return: derivative of x (numpy array of length N)
         '''
         d = np.zeros(self.N)
