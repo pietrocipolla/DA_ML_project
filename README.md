@@ -1,6 +1,9 @@
 # machine_learning_DA_part_1
 This repository contains the code for a ML-augmented data assimilation method, demonstrated on the Lorenz96 system. The code is implemented in four classes, each contained in a single .py file in the root directory.
 
+## Processed data
+Processed data for generating the figures is contained in the "PublicationFigs" directory. Data is in netcdf, text, and numpy array format. Figures in the paper can be generated using code in the "tables_and_figs.ipynb" notebook.
+
 ## Classes and Run Scripts
 "EnKF.py" contains methods for implementing the Ensemble Kalman Filter on the Lorenz 96 system. Options for covariance localization and covariance inflation are included. "L96.py" contains methods that specify the Lorenz system and allow for it to be integrated forward in time. "Experiment.py" contains the bulk of the codebase. It has as an attribute an Xarray DataSet object containing time series data of the true evolution of the system, synthetic observations, ensemble forecasts, and ensemble analyses. Its attributes specify the run settings, including localization, inflation, observation error standard deviation, ensemble size, and observation time step. It also contains methods for generating true trajectories and synthetic observations and for performing assimilation of those observations. Lastly, "NeuralNet.py" contains methods for training and using a simple CNN for assimilation. It implements a cyclic padding procedure and has methods for transforming provided input into the size and shape needed by the neural network.
 
