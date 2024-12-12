@@ -2,12 +2,12 @@ import sys
 sys.path.append('src')
 sys.path.append('../src')
 import numpy as np
-from EnKF import *
-from L96 import *
+from src.EnKF import *
+from src.L96 import *
 import pickle
-from Experiment import *
-from NeuralNet import *
-from NeuralNet import *
+from src.Experiment import *
+from src.NeuralNet import *
+from src.NeuralNet import *
 import random
 import tensorflow as tf
 import yaml
@@ -68,8 +68,8 @@ def runaug(sfile):
         with open(name+'.pickle','wb') as f:
             pickle.dump(experiment,f,protocol=4)
     else:
-        with open('/Users/luho4863/PycharmProjects/ML_DA_TDD/AlphaTuning/'+name+'.pickle','wb') as f:
+        with open(+name+'.pickle','wb') as f:
             pickle.dump(experiment,f)
 
-fname = sys.argv[1]
+fname = "./validationrunsettings.yml"
 runaug(fname)

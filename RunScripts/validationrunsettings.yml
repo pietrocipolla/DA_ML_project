@@ -1,7 +1,7 @@
-experiment_path: 'Raw Results/Sensitivity/base.pickle' #Filepath of experiment from which to pull settings and initial conditions
-name: 'Augmented Base' #Run name
-nn_fname: 'NNTuning/m_47.yml' #NN settings file. The file here is the one used for results in the published paper
-weights_file: 'NNTuning/training_progress/iter_47weights.23.hdf5'
+experiment_path: './s9.pickle' #Filepath of experiment from which to pull settings and initial conditions
+name: 'Augmented s9' #Run name
+nn_fname: '../NNTuning/m_47.yml' #NN settings file. The file here is the one used for results in the published paper
+weights_file: './m_0.weight.h5'
 experiment_settings:
   frac: .25 #Fraction of variables observed, applies only to EnKF assimilation steps
   assim_method: 'enkf' #one of "enkf", "augmented", "Ensemble CNN", or "Deterministic CNN"
