@@ -2,12 +2,11 @@ import sys
 sys.path.append('src')
 sys.path.append('../src')
 import numpy as np
-from EnKF import *
-from L96 import *
+from src.EnKF import *
+from src.L96 import *
 import pickle
-from Experiment import *
-from NeuralNet import *
-from NeuralNet import *
+from src.Experiment import *
+from src.NeuralNet import *
 import tensorflow as tf
 import random
 import yaml
@@ -23,9 +22,8 @@ def rms(xx,xa):
     ss = np.sqrt(ss)
     return(ss)
 
-
-for i in range(96):
-    settings_fname = '../NNTuning/m_'+str(i)+'.yml'
+if __name__ == '__main__':
+    settings_fname = '../NNTuning/m_47.yml'
     with open(settings_fname) as f:
         settings = yaml.safe_load(f)
     nlayers = settings['nlayers']
@@ -36,7 +34,7 @@ for i in range(96):
     training_fraction = settings['training_fraction']
     nepochs = settings['nepochs']
     nn = NeuralNet(nlayers=nlayers,filter_size=filter_size,N=nvars,nfmaps=nfmaps)
-    with open('../Raw Results/Sensitivity/s9.pickle','rb') as f:
+    with open('./s9.pickle','rb') as f:
         s9 = pickle.load(f)
     nn.buildmodel()
     nn.train(training_fraction=training_fraction, nepochs=nepochs, optimizer=optimizer, experiment=s9.ds)
@@ -73,6 +71,6 @@ for i in range(96):
     nn.model.save_weights(fn)
     val_rms = nn.model.history.history['val_root_mean_squared_error'][-1]
     settings['val_rms'] = val_rms
-    with open('../TNNuning/'+name+'_results.yml','w') as f:
+    with open('../NNTuning/'+name+'_results.yml','w') as f:
         yaml.dump(settings,f)
     train_rms = nn.model.history.history['root_mean_squared_error']
