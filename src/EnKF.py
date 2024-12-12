@@ -17,7 +17,7 @@ class EnKF:
         Ensemble size
     """
 
-    def __init__(self, N=None, loc=None, gamma=1, nens=1,localization_method = 'original'):
+    def __init__(self, N=None, loc=None, gamma=1, nens=1, localization_method='original'):
         self.nvars = N
         self.loc = loc
         self.gamma = gamma

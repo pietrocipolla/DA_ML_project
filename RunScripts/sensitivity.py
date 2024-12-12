@@ -1,7 +1,6 @@
 import sys
 sys.path.append('src')
 sys.path.append('../src')
-import numpy as np
 from src.Experiment import *
 import pickle
 import yaml
@@ -27,6 +26,5 @@ def runcase(settings_file):
     with open(settings['name']+'.pickle', 'wb') as f:
         pickle.dump(experiment, f)
 
-fname = "./sensitivityrunsettings_s9.yml"
-#sys.argv[1]
+fname = sys.argv[1]
 runcase(fname)
