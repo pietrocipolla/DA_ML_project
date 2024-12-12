@@ -68,7 +68,7 @@ def runaug(sfile):
         with open(name+'.pickle','wb') as f:
             pickle.dump(experiment,f,protocol=4)
     else:
-        with open(+name+'.pickle','wb') as f:
+        with open(name+'.pickle','wb') as f:
             pickle.dump(experiment,f)
 
 fname = "./validationrunsettings.yml"
