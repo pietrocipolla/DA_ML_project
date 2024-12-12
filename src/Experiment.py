@@ -182,7 +182,7 @@ class Experiment:
 #            xx = pickle.load(f).ds.xx.values[:,20000::1]
 #        with open('/Users/luho4863/PycharmProjects/ML_DA_TDD/ValidationRuns/TrainingData/s9.pickle', 'rb') as f:
 #            xaens_orig = pickle.load(f).ds.xaens.values
-        for i in range(1, nobs + 1):
+        for i in tqdm(range(1, nobs + 1), desc='assimilating: '):
             # For each observation
             '''
             if i%100==0:
