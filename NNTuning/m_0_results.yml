@@ -1,0 +1,10 @@
+filter_size: 3
+name: m_0
+nepochs: 25
+nfmaps: 7
+nlayers: 5
+nvars: 40
+optimizer: adam
+training_fraction: 0.5
+val_rms: 0.05405290424823761
+weights_file: m_0.weight.h5
