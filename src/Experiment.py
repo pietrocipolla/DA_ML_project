@@ -3,6 +3,9 @@ import numpy as np
 from L96 import *
 from EnKF import *
 from tqdm import tqdm
+import pickle
+from scipy.stats import qmc, norm, truncnorm
+from matplotlib import pyplot as plt
 
 
 class Experiment:
@@ -84,6 +87,18 @@ class Experiment:
             self.frac = settings['frac']
         except KeyError:
             pass
+        try:
+            self.assim_method = settings['assimilation method']
+        except KeyError:
+            pass
+        try:
+            self.alpha = settings['alpha']
+        except KeyError:
+            pass
+        try:
+            self.loc_method = settings['localization_method']
+        except KeyError:
+            pass
 
     def makeobs(self, std):
         """
@@ -152,7 +167,7 @@ class Experiment:
         """
 
         # Create EnKF object for performaing assimilation
-        enkf = EnKF(self.N, self.loc, self.gamma, self.nens)
+        enkf = EnKF(self.N, self.loc, self.gamma, self.nens,localization_method=self.loc_method)
 
         # Select only non NaN values of ds.yy to assimilate and count number of observations
         yy = self.ds.yy.isel(time=self.ds.yy.notnull()[0], space=self.ds.yy.space)
@@ -163,9 +178,26 @@ class Experiment:
         xfens = np.zeros([self.N, self.nens, nobs + 1])
         xfens[:, :, 0] = xf0
         xaens[:, :, 0] = xf0
-        xa = np.zeros([self.N, nobs + 1])
-        for i in tqdm(range(1, nobs + 1), desc='assimilating: '):
+#        with open('/Users/luho4863/PycharmProjects/revisions/Sensitivity/base.pickle', 'rb') as f:
+#            xx = pickle.load(f).ds.xx.values[:,20000::1]
+#        with open('/Users/luho4863/PycharmProjects/ML_DA_TDD/ValidationRuns/TrainingData/s9.pickle', 'rb') as f:
+#            xaens_orig = pickle.load(f).ds.xaens.values
+        for i in range(1, nobs + 1):
             # For each observation
+            '''
+            if i%100==0:
+                rmsa = xaens[:,:,:i-1].mean(axis=1)-xx[:,:i-1]
+                rmsa = rmsa**2
+                rmsa = rmsa.sum(axis=0)/40
+                rmsa = np.sqrt(rmsa)
+                rmsf  = xfens[:,:,:i-1].mean(axis=1)-xx[:,:i-1]
+                rmsf = rmsf**2
+                rmsf = rmsf.sum(axis=0)/40
+                rmsf = np.sqrt(rmsf)
+                print('i:'+str(i))
+                print(rmsf.mean())
+                print(rmsa.mean())
+            '''
             for j in range(self.nens):
                 # For each ensemble member
 
@@ -173,13 +205,12 @@ class Experiment:
                 ret = self.get_true(xaens[:, j, i - 1], self.dt)
                 xfens[:, j, i] = ret.isel(time=-1)
             y = yy[:, i]  # y  is the current observation
-            if nn is None:
+            if self.assim_method.lower() == 'enkf':
                 # If method is EnKF, make observation operator:
                 h = self.make_obs()
-
                 # assimilate with forecast, observation, observation operator, and observation error:
                 xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
-            else:
+            elif self.assim_method == 'augmented':
                 if i % 2 == 0:
                     # If method is augmented, on even time steps use EnKF
                     h = self.make_obs()
@@ -187,13 +218,36 @@ class Experiment:
                 else:
                     # On odd time steps use NN
 
-                    # Calculate vector analysis from forecast mean and observation
-                    xpmean = nn.assimilate(xfens[:, :, i].mean(axis=1), y.values)
-                    xa[:, i] = xpmean
-                    # Adjust ensemble forecast so that the mean=analysis mean:
-                    delta = xfens[:, :, i].mean(axis=1) - xpmean
+                    # Get predicted vector mean+stdev using CNN:
+                    xin = np.zeros([self.N,2])
+                    xin[:,0] = xfens[:,:,i].mean(axis=1)
+                    xin[:,1] = xfens[:,:,i].std(axis=1)
+                    xpred = nn.assimilate(xin, y.values)
+                    factors = xpred[:,1]/xin[:,1]
+                    factors = factors+self.alpha*(1-factors)
                     for j in range(self.N):
-                        xaens[j, :, i] = xfens[j, :, i] - delta[j]
+                        dev = xfens[j,:,i]-xfens[j, :, i].mean()
+                        for k in range(self.nens):
+                            xaens[j,k,i] = xpred[j,0]+dev[k]*factors[j]
+            elif self.assim_method == 'Ensemble CNN':
+                xin = np.zeros([self.N, 2])
+                xin[:, 0] = xfens[:, :, i].mean(axis=1)
+                xin[:, 1] = xfens[:, :, i].std(axis=1)
+                xpred = nn.assimilate(xin, y.values)
+                factors = xpred[:, 1] / xin[:, 1]
+                factors = factors + self.alpha * (1 - factors)
+                for j in range(self.N):
+                    dev = xfens[j, :, i] - xfens[j, :, i].mean()
+                    for k in range(self.nens):
+                        xaens[j, k, i] = xpred[j, 0] + dev[k] * factors[j]
+            elif self.assim_method == 'Deterministic CNN':
+                xin = np.zeros([self.N, 2])
+                xin[:, 0] = xfens[:, :, i].mean(axis=1)
+                xpred = nn.assimilate(xin, y.values)
+                for j in range(self.N):
+                    for k in range(self.nens):
+                        xaens[j, k, i] = xpred[j, 0]
+
 
         # Retrieve time array for non NaN observations and save results as DataArrays in ds
         t = self.ds.time.isel(time=self.ds.yy.notnull()[0])

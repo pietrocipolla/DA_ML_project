@@ -17,11 +17,12 @@ class EnKF:
         Ensemble size
     """
 
-    def __init__(self, N=None, loc=None, gamma=1, nens=1):
+    def __init__(self, N=None, loc=None, gamma=1, nens=1,localization_method = 'original'):
         self.nvars = N
         self.loc = loc
         self.gamma = gamma
         self.nens = nens
+        self.localization_method = localization_method
 
     def obs(self, h, x):
         """
@@ -60,6 +61,8 @@ class EnKF:
         :param cov: covariance matrix to localize
         :return: localized covariance matrix
         """
+
+
         loc = self.loc
         for i in range(self.nvars):
             for j in range(self.nvars):
@@ -73,8 +76,12 @@ class EnKF:
                 if i == j:
                     out = 0
                 dist = min([mid, out])
-                if dist > loc:
-                    cov[i, j] = 0
+                if self.localization_method == 'gc':
+                    cov[i,j] = cov[i,j]*self.gaspari_cohn(dist,loc)
+                else:
+                    if dist > loc:
+                        cov[i, j] = 0
+
         return (cov)
 
     def assimilate(self, xf, y, h, cov, r):
@@ -110,3 +117,31 @@ class EnKF:
             D[i, :] = y[i].values + np.random.normal(0, r, self.nens)
         xp = self.assimilate(xf, D, h, cov, r)
         return (xp)
+
+    def gaspari_cohn(self,distance,c):
+        '''
+        Compute Gaspari-Cohn localization factor
+
+        :param distance: Univariate distance
+        :param c: Tunable GC localization parameter, if distance exceeds 2c, cov=0
+        '''
+        beta = distance/c
+        if distance <= c:
+            ret = -0.25*beta**5
+            ret = ret+0.5*beta**4
+            ret = ret+(5/8)*beta**3
+            ret = ret-(5/3)*beta**2
+            ret = ret+1
+        elif distance<= 2*c:
+            ret = (1/12)*beta**5
+            ret = ret-0.5*beta**4
+            ret = ret+(5/8)*beta**3
+            ret = ret+(5/3)*beta**2
+            ret = ret-5*beta
+            ret = ret+4
+            ret = ret - 2/(3*beta)
+        elif distance>2*c:
+            ret = 0
+        else:
+            raise ValueError
+        return ret

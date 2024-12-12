@@ -1,0 +1,11 @@
+F: 8 #L96 forcing parameter
+T: 2000 #max time in model units
+N: 40 #number of L96 variables
+dt: 0.05 #Assimilation time step
+frac: 1 #Fraction of variables observed
+nens: 100 #Ensemble size
+loc: 5 #Localization factor
+localization_method: 'original' #one of "original" or "gc"
+gamma: 1 #Covariance inflation
+r: 0.3 #Observation error standard deviation, fraction of climatological standard deviation
+name: 'base' #run name
