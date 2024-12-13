@@ -26,5 +26,5 @@ def runcase(settings_file):
     with open(settings['name']+'.pickle', 'wb') as f:
         pickle.dump(experiment, f)
 
-fname = sys.argv[1]
+fname = "./sensitivityrunsettings_s9.yml"
 runcase(fname)

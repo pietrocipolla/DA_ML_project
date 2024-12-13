@@ -1,12 +1,7 @@
 import sys
 sys.path.append('src')
 sys.path.append('../src')
-import numpy as np
-from src.EnKF import *
-from src.L96 import *
-import pickle
 from src.Experiment import *
-from src.NeuralNet import *
 from src.NeuralNet import *
 import random
 import tensorflow as tf
@@ -33,6 +28,7 @@ def runaug(sfile):
         base = pickle.load(f)
     with open(fn, 'rb') as f:
         experiment = pickle.load(f)
+
     npoints = base.ds.xx.shape[1]-1
     npoints = int(npoints)
     x0 = base.ds.xaens[:,:,int(npoints/2)]
@@ -55,7 +51,7 @@ def runaug(sfile):
         nlayers = nn_settings['nlayers']
         filter_size = nn_settings['filter_size']
         nfmaps = nn_settings['nfmaps']
-        nn = NeuralNet(nlayers=nlayers,filter_size=filter_size,nfmaps=nfmaps,N=40)
+        nn = NeuralNet(nlayers=nlayers,filter_size=filter_size,N=40,nfmaps=nfmaps,)
         nn.buildmodel()
         nn.model.load_weights(settings['weights_file'])
     except KeyError:

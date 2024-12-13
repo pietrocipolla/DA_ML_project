@@ -1,26 +1,25 @@
 import sys
 sys.path.append('src')
 sys.path.append('../src')
-import numpy as np
-from src.EnKF import *
-from src.L96 import *
-import pickle
 from src.Experiment import *
 from src.NeuralNet import *
 import tensorflow as tf
 import random
 import yaml
+
 random.seed(0)
 np.random.seed(0)
 tf.random.set_seed(0)
 
-def rms(xx,xa):
-    ss = xx-xa
-    ss = ss**2
+
+def rms(xx, xa):
+    ss = xx - xa
+    ss = ss ** 2
     ss = ss.sum(axis=1)
-    ss = ss/40
+    ss = ss / 40
     ss = np.sqrt(ss)
-    return(ss)
+    return (ss)
+
 
 if __name__ == '__main__':
     settings_fname = '../NNTuning/m_47.yml'
@@ -33,8 +32,8 @@ if __name__ == '__main__':
     optimizer = settings['optimizer']
     training_fraction = settings['training_fraction']
     nepochs = settings['nepochs']
-    nn = NeuralNet(nlayers=nlayers,filter_size=filter_size,N=nvars,nfmaps=nfmaps)
-    with open('./s9.pickle','rb') as f:
+    nn = NeuralNet(nlayers=nlayers, filter_size=filter_size, N=nvars, nfmaps=nfmaps)
+    with open('./s9.pickle', 'rb') as f:
         s9 = pickle.load(f)
     nn.buildmodel()
     nn.train(training_fraction=training_fraction, nepochs=nepochs, optimizer=optimizer, experiment=s9.ds)
@@ -66,12 +65,12 @@ if __name__ == '__main__':
         name = settings['name']
     except KeyError:
         name = 'model'
-    fn = name+'.weight.h5'
+    fn = name + 'weight.h5'
     settings['weights_file'] = fn
     nn.model.save_weights(fn)
 
     val_rms = nn.model.history.history['val_root_mean_squared_error'][-1]
     settings['val_rms'] = val_rms
-    with open('../NNTuning/'+name+'_results.yml','w') as f:
-        yaml.dump(settings,f)
+    with open('../NNTuning/' + name + 'results.yml', 'w') as f:
+        yaml.dump(settings, f)
     train_rms = nn.model.history.history['root_mean_squared_error']

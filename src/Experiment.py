@@ -209,7 +209,7 @@ class Experiment:
                 h = self.make_obs()
                 # assimilate with forecast, observation, observation operator, and observation error:
                 xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
-            elif self.assim_method == 'augmented':  # Augmented
+            elif self.assim_method == 'augment':  # Augmented
                 if i % 2 == 0:
                     # If method is augmented, on even time steps use EnKF
                     h = self.make_obs()
