@@ -1,0 +1,10 @@
+experiment_path: './s9.pickle' #Filepath of experiment from which to pull settings and initial conditions
+name: 'AllObs' #Run name
+nn_fname: '../NNTuning/m_47.yml' #NN settings file. The file here is the one used for results in the published paper
+weights_file: './m_0.weight.h5'
+experiment_settings:
+  frac: 1 #Fraction of variables observed, applies only to EnKF assimilation steps
+  assim_method: 'enkf' #one of "enkf", "augmented", "Ensemble CNN", or "Deterministic CNN"
+  freq: 1 # observation assimilation frequency, 1=every time step, 2=every other, etc.
+  alpha: .7 #equal to 1-alpha from the published paper, i.e. alpha=0.3 in the paper corresponds to alpha=0.7 here
+

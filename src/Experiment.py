@@ -200,24 +200,22 @@ class Experiment:
             '''
             for j in range(self.nens):
                 # For each ensemble member
-
                 # Integrate L96 from last analysis to current time step
                 ret = self.get_true(xaens[:, j, i - 1], self.dt)
                 xfens[:, j, i] = ret.isel(time=-1)
             y = yy[:, i]  # y  is the current observation
-            if self.assim_method.lower() == 'enkf':
+            if self.assim_method.lower() == 'enkf':  # AllObs
                 # If method is EnKF, make observation operator:
                 h = self.make_obs()
                 # assimilate with forecast, observation, observation operator, and observation error:
                 xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
-            elif self.assim_method == 'augmented':
+            elif self.assim_method == 'augmented':  # Augmented
                 if i % 2 == 0:
                     # If method is augmented, on even time steps use EnKF
                     h = self.make_obs()
                     xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
                 else:
                     # On odd time steps use NN
-
                     # Get predicted vector mean+stdev using CNN:
                     xin = np.zeros([self.N,2])
                     xin[:,0] = xfens[:,:,i].mean(axis=1)
