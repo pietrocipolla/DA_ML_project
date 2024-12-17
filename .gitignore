@@ -2,3 +2,5 @@
 *.pyc
 test.py
 .idea
+*.DS_store
+test

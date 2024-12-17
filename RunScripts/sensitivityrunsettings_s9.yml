@@ -1,7 +1,7 @@
 F: 8 #L96 forcing parameter
-T: 2000 #max time in model units
+T: 100 #max time in model units
 N: 40 #number of L96 variables
-dt: 0.05 #Assimilation time step
+dt: 0.005 #Assimilation time step
 frac: 1 #Fraction of variables observed
 nens: 100 #Ensemble size
 loc: 7 #Localization factor

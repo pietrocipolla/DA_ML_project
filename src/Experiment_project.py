@@ -1,6 +1,6 @@
 import xarray as xr
 import numpy as np
-from L96 import *
+from L96_project import *
 from EnKF import *
 from tqdm import tqdm
 import pickle
@@ -99,18 +99,32 @@ class Experiment:
             self.loc_method = settings['localization_method']
         except KeyError:
             pass
+        self.slope = None
+        self.intercept = None
+        self.get_params()
 
-    def makeobs(self, std):
+    def makeobs(self, std, x0, tf):
         """
         Create synthetic observations from truth (contained in ds.xx)
 
         :param std: observation noise standard deviation
         :return: xarray DataArray of synthetic observations
         """
-        ret = self.ds.xx + np.random.normal(0, std, self.ds.xx.shape)
+        t = np.linspace(0, tf, int(tf / self.dt) + 1)
+        M = L96TwoLevel(K=40, dt=self.dt, F=self.F, X_init=x0, save_dt=self.dt)
+        M.iterate(tf)
+        xx = M.get_X().T
+        da = xr.DataArray(xx, coords=[list(range(self.N)), t], dims=['space', 'time'])
+        ret = da + np.random.normal(0, std, da.shape)
         return ret
 
-    def get_true(self, x0, tf):
+    def get_params(self):
+        l96_two = L96TwoLevel(save_dt=0.001)
+        l96_two.iterate(10)
+        h2 = l96_two.history
+        self.slope, self.intercept = np.polyfit(np.ravel(h2.X), np.ravel(h2.B), 1)
+
+    def get_true(self, x0, tf, noprogress=False):
         """
         Create truth by integrating L96 forward.
 
@@ -118,9 +132,12 @@ class Experiment:
         :param tf: time to integrate L96 to
         :return: xarray DataArray of true L96 trajectory
         """
+        # Run the model
         t = np.linspace(0, tf, int(tf / self.dt) + 1)
-        M = L96(self.F, self.N)
-        xx = M.integrate(x0, t)
+        M = L96TwoLevel(K=40, dt=self.dt, F=self.F, save_dt=self.dt, X_init=x0,
+                        parameterization=PolyParam([self.slope, self.intercept]))
+        M.iterate(tf, noprogress)
+        xx = M.get_X().T
         da = xr.DataArray(xx, coords=[list(range(self.N)), t], dims=['space', 'time'])
         return da
 
@@ -200,22 +217,24 @@ class Experiment:
             '''
             for j in range(self.nens):
                 # For each ensemble member
+
                 # Integrate L96 from last analysis to current time step
-                ret = self.get_true(xaens[:, j, i - 1], self.dt)
+                ret = self.get_true(xaens[:, j, i - 1], self.dt, True)
                 xfens[:, j, i] = ret.isel(time=-1)
             y = yy[:, i]  # y  is the current observation
-            if self.assim_method.lower() == 'enkf':  # AllObs
+            if self.assim_method.lower() == 'enkf':
                 # If method is EnKF, make observation operator:
                 h = self.make_obs()
                 # assimilate with forecast, observation, observation operator, and observation error:
                 xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
-            elif self.assim_method == 'augment':  # Augmented
+            elif self.assim_method == 'augmented':
                 if i % 2 == 0:
                     # If method is augmented, on even time steps use EnKF
                     h = self.make_obs()
                     xaens[:, :, i] = enkf.ensemble_assim(xfens[:, :, i], y, h, self.r)
                 else:
                     # On odd time steps use NN
+
                     # Get predicted vector mean+stdev using CNN:
                     xin = np.zeros([self.N,2])
                     xin[:,0] = xfens[:,:,i].mean(axis=1)
