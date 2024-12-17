@@ -6,6 +6,6 @@ frac: 1 #Fraction of variables observed
 nens: 100 #Ensemble size
 loc: 7 #Localization factor
 localization_method: 'original' #one of "original" or "gc"
-gamma: 1 #Covariance inflation
+gamma: 1.1 #Covariance inflation
 r: 0.3 #Observation error standard deviation, fraction of climatological standard deviation
 name: 's9' #run name
